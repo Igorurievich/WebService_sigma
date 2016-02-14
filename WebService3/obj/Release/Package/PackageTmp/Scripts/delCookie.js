@@ -1,0 +1,3 @@
+﻿function delCookie() {
+    $.removeCookie('tokenInfo');
+}

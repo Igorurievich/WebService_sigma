@@ -1,0 +1,114 @@
+﻿@{
+    //ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container">
+<div class="row">
+    <div class="col-md-12">
+        <footer>
+            <h4>Registration</h4>
+        </footer>
+    </div>
+</div>
+</div>
+<div class="container">
+    <form role="form">
+        <div class="form-group">
+            <label for="log">Login:</label>
+            <input type="text" class="form-control" id="login">
+        </div>
+        <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="password" class="form-control" id="password">
+        </div>
+        <div class="form-group">
+            <label for="name">First name:</label>
+            <input type="text" class="form-control" id="name">
+        </div>
+        <div class="form-group">
+            <label for="surname">Surname:</label>
+            <input type="text" class="form-control" id="surname">
+        </div>
+        <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="text" class="form-control" id="email">
+        </div>
+        <button type="submit" id="send" class="btn btn-default">Submit</button>
+    </form>
+    </div>
+    @*<input type="button" id="send" value="Send" />
+    @*<input type="button" id="getuser" value="GetUser" />*@
+    @*<input type="button" id="logout" value="LogOut" />*@
+
+    <ul id="discussion"></ul>
+
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.cookie.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/Scripts/SignalR_API.js"></script>
+    <script>
+        var token;
+        var con;
+        $(function () {
+            $.connection.hub.url = "http://46.37.197.32:8080/Server/signalr"
+            con = $.connection.connectionHub;
+            con.client.NewDeviceInfo = function (message) {
+                console.log(message);
+                $('#discussion').append('<li>' + message + '</li>');
+            };
+
+            $.connection.hub.start().done(function () {
+                CheckCookie();
+                $('#send').click(function () {
+                    con.server.registrationAsync($('#login').val(), $('#password').val(), $('#name').val(), $('#surname').val(), $('#email').val()).done(function (result) {
+                        console.log(token);
+                        //$('#discussion').append('<li>' + result + '</li>');
+                        con.server.authorizationAsync($('#login').val(), $('#password').val()).done(function (result) {
+                            token = result;
+                            console.log(token);
+                            var expire = new Date();
+                            expire.setHours(expire.getHours() + 4);
+                            document.cookie = "tokenInfo=" + token + ";expires=" + expire.toUTCString() + ";";
+                            con.server.getUserAsync(token).done(function (user) {
+                                //console.log(user);
+                                $('#LogName').text(JSON.parse(user).Name);
+                                alert("hhhh");
+                            });
+                        });
+                    });
+                });
+                //$('#getuser').click(function () {
+
+                //});
+                $('#logout').click(function (name) {
+                    //delCookie('tokenInfo');
+                    console.log('hello2345')
+                    $.removeCookie('tokenInfo', { path: '/' });
+                });
+
+
+                function CheckCookie() {
+                    var parts = document.cookie.split("=");
+                    var name = parts[0];
+                    var value = parts[1];
+                    if (name == 'tokenInfo') {
+                        con.server.getUserAsync(value).done(function (user) {
+                            console.log(user);
+                            //$('#discussion').append('<li>' + 'cookie' + JSON.parse(user).Name + '</li>');
+                        });
+                    }
+                }
+                function delCookie(name) {
+                    document.cookie = name + "=" + "; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+                }
+                // This optional function html-encodes messages for display in the page.
+                function htmlEncode(value) {
+                    var encodedValue = $('<div />').text(value).html();
+                    return encodedValue;
+                }
+            }
+            )
+        });
+    </script>
+

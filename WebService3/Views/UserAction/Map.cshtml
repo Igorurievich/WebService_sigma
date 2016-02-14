@@ -1,0 +1,123 @@
+﻿@{
+    ViewBag.Title = "Zone";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/map_API.js"></script>
+
+
+@section scripts{
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link href="~/Content/Zones.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="http://api.maps.ovi.com/jsl.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src='~/Scripts/signalr_API.js'></script>
+    <script src="~/Scripts/jquery_cookie.js"></script>
+    <script src="~/Scripts/WindowInfo.js"></script>
+    <script src="~/Scripts/map_API.js"></script>
+ 
+}
+
+<div id="map" style="z-index: 30; left:0px; top:150px; width: 100%; height: 100%;"></div>
+<div id="control-panel">
+
+    <div id="tab-control" class="btn-panel">
+        <ul class="nav nav-tabs">
+            <li><a data-toggle="tab" onclick="enableUserSettings()">Settings</a></li>
+            <li><a data-toggle="tab" onclick="enableRouts()">Routes</a></li>
+            <li><a data-toggle="tab" onclick="enableZones()">Zones</a></li>
+        </ul>
+    </div>
+    <div style="margin:5px">
+        <div id="active-zone" style="display:none">
+            <div id="control-zone2">
+                Zones:
+                <select id="combobox" style="width:100%" onchange="polygons.changePolygon()"></select>
+            </div>
+            Device:
+            <div id="devinfo"></div>
+            <div id="dateActive"></div>
+            <div id="control-zone">
+                <button class="btn btn-default" onclick="btnNewZone()">New</button>
+                <button class="btn btn-default" id="btnEdit" style="display:none" onclick="btnEditZone()">Edit</button>
+                <button class="btn btn-default" id="btnRomove" style="display:none" onclick="btnRemove()">Remove</button>
+            </div>
+            <div id="control-edit" style="display:none">
+                <select id="cbDevice" style="width:100%" onchange="polygons.changePolygon()"></select>
+                <button id="btnAddDevice" class="btn btn-default" onclick="polygons.setDeviseZone()">Add Device</button>
+                @*<button id="btnAddDevice"  onclick="polygons.removeDeviseZone()">Remove Device</button>*@
+                <br />
+                <b>Name:</b><br />
+                <input class="input-group" id="zoneNameEdit" type="text" />
+                <button class="btn btn-default" onclick="btnUpdate()">Update</button>
+                <button class="btn btn-default" onclick="btncancel()">Cancel</button>
+                <div class="control-time-active" id="timeActiveControl" style="display:none">
+                    <input id="ch_box1" type="checkbox" value=1 />Sunday<br />
+                    <input id="ch_box2" type="checkbox" value=2 />Monday<br />
+                    <input id="ch_box3" type="checkbox" value=4 />Tuesday<br />
+                    <input id="ch_box4" type="checkbox" value=8 />Wednesday<br />
+                    <input id="ch_box5" type="checkbox" value=16 />Thursday<br />
+                    <input id="ch_box6" type="checkbox" value=32 />Friday<br />
+                    <input id="ch_box7" type="checkbox" value=64 />Saturday<br />
+                    <input id="ch_boxAll" type="checkbox" value=128 onchange="chakedAll()" />All<br />
+                    Start:<br />
+                    <input id="startTime" type="time" value="00:00" /><br />
+                    Stop:<br />
+                    <input id="endTime" type="time" value="23:59" /><br />
+                    <button class="btn btn-default" onclick="polygons.setTimeActivity()">Add</button>
+                    <button  class="btn btn-default" onclick="removeTimeActive()">Remove</button>
+                </div>
+            </div>
+            <div id="save-cancel" style="display:none">
+                <b>Name:</b><br />
+                <input id="zoneName" type="text" /><br />
+                <button onclick="btnsave()">Save</button>
+                <button onclick="btncancel()">cancel</button>
+            </div>
+        </div>
+        <div id="user-settings" style="display:none">
+
+            <div class="form-group">
+                @*<label for="sel1">Select list:</label>*@
+                <select class="form-control" id="usrs"></select>
+            </div>
+            <div id="usrinfo" style="display:none">
+                <div class="form-group">
+                    <label for="ex2">Input Name:</label>
+                    <input class="form-control" id="inputTB" type="text" value="" disabled>
+                </div>
+                <div>
+                    <label for="setActivity">Activity:</label>
+                    <input onclick="setActivity()" type="button" value="" id="setActivity" disabled class="btn btn-default" />
+                </div>
+                <br />
+                <label for="timespan">Activity for device:</label>
+                <div id="timespan">
+                    <label for="changeStartTime">From:</label>
+                    <input onclick="" type="time" value="00:00" id="changeStartTime" class="btn btn-default" disabled />
+                    <label for="changeEndTime">To:</label>
+                    <input onclick="" type="time" value="23:59" id="changeEndTime" class="btn btn-default" disabled />
+                </div>
+                <input onclick="setSettings()" type="button" value="Change Settings" id="changeSettings" class="btn btn-default" />
+                <input onclick="cancelSettings()" type="button" value="Cancel" id="cancelSettings" class="btn btn-default" />
+            </div>
+
+        </div>
+
+        <div id="active-rount" style="display:block">
+            <h4>Select range of route</h4>
+            <small>Start date and time:</small><br />
+            <input type='datetime-local' id='timestart'><br />
+            <small>End date and time:</small><br />
+            <input type='datetime-local' id='timestop'><br />
+            <button id="showRoute" name="action" value="delete" onclick="routs.load()">Show Route</button><br />
+            <div id="route-data"></div>
+        </div>
+    </div>
+
+</div>

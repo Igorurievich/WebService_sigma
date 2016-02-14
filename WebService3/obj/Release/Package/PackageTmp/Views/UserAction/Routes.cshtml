@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "Routes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div onload="initMap">
+    <meta charset="utf-8">
+    <link href="~/Content/Routes.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/Scripts/jquery_cookie.js"></script>
+    <script src="http://api.maps.ovi.com/jsl.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/SignalR_API.js"></script>
+    <div id="map"></div>
+        <div id="control-panel" style="position:fixed">
+            <input type='datetime-local' name='time_start' id='time_start'><br />
+            <input type='datetime-local' name='time_stop' id='time_stop'><br />
+            <button id="showRoute" name="action" value="delete">Show Route</button><br />
+        </div>
+    <script type="text/javascript">
+        var token = $.cookie('tokenInfo');
+        if (!(token == null)) {
+            initMap();
+            var map;
+            var con;
+            var pos = [];
+            $(function () {
+                $.connection.hub.url = "http://46.37.197.32:8080/Server/signalr"
+                con = $.connection.connectionHub;
+                $.connection.hub.start().done(function () {
+                    
+                    $('#showRoute').click(function () {
+                        console.log($('#time_start').val());
+                        con.server.getRoute(token, $('#time_start').val(), $('#time_stop').val()).done(function (result) {
+                            map.objects.clear();
+                            var routes = JSON.parse(result);
+                            pos = [];
+                            for (var i = 0; i < routes.length - 1; i++) {
+                                if (Math.abs(Date.parse(routes[i].DateTime) - Date.parse(routes[i + 1].DateTime)) > 50000)
+                                {
+                                    map.objects.add(new ovi.mapsapi.map.Polyline(
+                                        pos,
+                                        {
+                                            pen: { strokeColor: "#22CA", lineWidth: 5 }
+                                        }
+                                    ));
+                                    pos = [];
+                                }                               
+                                pos.push(new ovi.mapsapi.geo.Coordinate(routes[i].Latitude, routes[i].Longitude));
+                            }
+                            map.objects.add(new ovi.mapsapi.map.Polyline(
+                                pos,
+                                {
+                                    pen: { strokeColor: "#22CA", lineWidth: 5 }
+                                }
+                            ));
+                            //map.objects.add(new ovi.mapsapi.map.StandardMarker(pos[0], {
+                            //    text: "Start",
+                            //    draggable: false
+                            //}));
+                            //map.objects.add(new ovi.mapsapi.map.StandardMarker(pos[pos.length-1], {
+                            //    text: "Finish",
+                            //    draggable: false
+                            //}));
+                        });
+                    });
+                });
+            });
+        }
+        else {
+            window.location.replace("/WebService/Acount/Login");
+        }
+        function initMap() {
+            map = new ovi.mapsapi.map.Display(
+                             document.getElementById("map"), {
+                                 components: [
+                                     new ovi.mapsapi.map.component.Behavior(),
+                                     new ovi.mapsapi.map.component.ZoomBar(),
+                                     new ovi.mapsapi.map.component.Overview(),
+                                     new ovi.mapsapi.map.component.TypeSelector(),
+                                     new ovi.mapsapi.map.component.ScaleBar()],
+                                 zoomLevel: 10,
+                                 center: [46.4613364, 30.7443335]
+                             });
+            map.removeComponent(map.getComponentById("zoom.MouseWheel"));
+        }
+    </script>
+</div>

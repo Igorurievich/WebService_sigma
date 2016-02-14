@@ -1,0 +1,137 @@
+﻿ #control-panel {
+top: 90px;
+width:auto;
+height: auto;
+right:5px;
+bottom: 50px;
+background: rgba(224, 224, 209, 0.4);
+box-shadow: 0 0 10px rgba(0,0,0,0.2);
+border-radius: 4px;
+z-index: 1;
+position:fixed;
+}
+
+.btn-group button{
+    margin:5px;
+    width:95%;
+}
+
+
+
+.btn-panel button {
+  width:49%;
+  display: inline-block;
+  font-size: 12px;
+  color: rgb(205,216,228);
+  text-decoration: none;
+  padding: .2em .8em;
+  outline: none;
+  border-right: 1px solid rgba(13,20,27,.5);
+  border-top: 1px solid rgba(270,278,287,.01);
+  background-color: rgb(64,73,82);
+  background-image:
+   radial-gradient(1px 60% at 0% 50%, rgba(255,255,255,.3), transparent),
+   radial-gradient(1px 60% at 100% 50%, rgba(255,255,255,.3), transparent),
+   linear-gradient(rgb(64,73,82), rgb(72,81,90));
+}
+.btn-panel button:hover {
+  background-image:
+   radial-gradient(1px 60% at 0% 50%, rgba(255,255,255,.3), transparent),
+   radial-gradient(1px 60% at 100% 50%, rgba(255,255,255,.3), transparent),
+   linear-gradient(rgb(51,60,67), rgb(58,65,72));
+}
+.btn-panel button:focus {
+  color: rgb(245,247,250);
+  border-top: 1px solid rgb(67,111,136);
+  background-image:
+   linear-gradient(rgb(46,95,122), rgb(36,68,92));
+}
+.btn-panel button:focus:hover {
+  border-top: 1px solid rgb(49,87,107);
+  background-image:
+   linear-gradient(rgb(33,77,98), rgb(29,57,77));
+}
+
+
+
+.input-group {
+    margin:5px;
+    width:95%;
+}
+
+.time-active{
+    margin: 5px;
+    border: 1px solid;
+    position:relative;
+    border-radius: 5px;
+    padding:5px;
+    background: rgb(224, 224, 209);
+}
+
+.control-time-active{
+    margin: 5px;
+    border: 1px solid;
+    border-radius: 5px;
+    padding:5px;
+    background: rgba(220, 220, 62, 0.56);
+}
+
+ .notif {
+ width: 340px;
+ position:absolute;
+ margin: 0 auto 25px auto;
+ padding: 30px 20px;
+ text-align: left;
+ border-radius: 12px;
+ cursor: default;
+ display: none;
+ z-index:10;
+ background: rgba(0, 0, 0, 0.6);
+ bottom:0;
+ left:5px;
+}
+ 
+.notif p {
+ text-align: left;
+ width: 250px;
+ font-weight: bold;
+ font-size: 15px;
+ margin: 0;
+ color:white;
+}
+
+.delete-notif {
+    width:22px;
+    height:20px;
+    text-align:center;
+    color:white;
+    right:7px;
+    top:7px;
+    border-radius: 20%;
+}
+
+.delete-notif:hover{
+    background:rgb(0, 0, 0);
+}
+ 
+.notif p:before {
+ text-align: center;
+ border: 3px solid rgba(255, 255, 255, 1);
+ margin-top: -18px;
+ top: 50%;
+ right: 25px;
+ width: 35px;
+ content: '!';
+ font-size: 30px;
+ color: rgba(255, 255, 255, 1);
+ position: absolute;
+ height: 35px;
+ line-height: 29px;
+ border-radius: 50%;
+}
+
+
+.active-zone button{
+    width:100%;
+}
+

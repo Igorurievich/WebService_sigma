@@ -1,0 +1,102 @@
+﻿@*<!DOCTYPE html>*@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Tracking Device Position</title>
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Zones.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+    <script src="~/Scripts/delCookie.js"></script>
+    <script src="~/Scripts/SignalR_API.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/WindowInfo.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/Scripts/jquery_cookie.js"></script>
+    <script src="~/Scripts/CheckJS.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        var token = $.cookie('tokenInfo');
+        $(document).ready(function () {
+            var con;
+            var username = null;
+            
+            console.log(token);
+            $(function () {
+                $.connection.hub.url = "http://46.37.197.32:8080/Server/signalr"
+                con = $.connection.connectionHub;
+                $.connection.hub.start().done(function () {
+                    
+                    if (token == null) {
+                        console.log("yes");
+                        $(".output").prepend('<li><a href="/WebService/Acount/Login">Login</a></li>');
+                        $(".output").prepend('<li><a href="/WebService/Acount/Register">Register</a></li>');
+                    }
+                    else if (!(token == null))
+                    {
+                        console.log("no");
+                        con.server.getUserAsync($.cookie("tokenInfo")).done(function (user) {
+                            username = JSON.parse(user).Name;
+                            console.log(JSON.parse(user).Name);
+                            if (username != 'null') {
+                                $(".output").prepend('<li><a href="/WebService/UserAction/PersonalSettings">' + username + '</a></li>');
+                                $(".output").append('<li><a href="/WebService/Home/Index" onClick="delCookie()">Logout</a></li>');
+                            }
+                        })
+                    }
+                });
+            });
+            $.connection.hub.stop();
+        });
+
+    </script>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Tracking Device Position", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("Routes", "Routes", "UserAction")</li>
+                    <li>@Html.ActionLink("Monitoring", "DevicePos", "UserAction")</li>
+                    <li>@Html.ActionLink("Zones", "Zones", "UserAction")</li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right output">
+
+                    @*<li>@Html.ActionLink("Register", "Register", "Acount")</li>*@
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div>
+        @RenderBody()
+
+        <hr />
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <footer>
+                        <p>&copy; @DateTime.Now.Year - Tracking Device Position</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    @*@Scripts.Render("~/bundles/siganlr")
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")*@
+    @RenderSection("scripts", required: false)
+</body>
+</html>

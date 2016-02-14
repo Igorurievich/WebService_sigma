@@ -1,0 +1,161 @@
+﻿@{
+    ViewBag.Title = "Routes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div onload="initMap">
+    <meta charset="utf-8">
+    <link href="~/Content/Routes.css" rel="stylesheet" type="text/css" />
+    
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/Scripts/SignalR_API.js"></script>
+    <script src="~/Scripts/jquery_cookie.js"></script>
+    <script src="http://api.maps.ovi.com/jsl.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/RoutesJS.js"></script>
+    <script src="~/Scripts/CheckCookie.js"></script>
+    <script>
+    сheckCookie();
+    </script>
+    <div id="map"></div>
+    <div id="control-panel" style="position:fixed">
+
+        <h4>Select range of route</h4>
+        <small>Start date and time:</small><br />
+        <input type='datetime-local' id='timestart'><br />
+        <small>End date and time:</small><br />
+        <input type='datetime-local' id='timestop'><br />
+        <button id="showRoute" name="action" value="delete">Show Route</button><br />
+        <div id="route-data">
+            
+        </div>
+    </div>
+    <script type="text/javascript">
+        var token = $.cookie('tokenInfo');
+        initMap();
+        var map;
+        var con;
+        var oldMarkerStart;
+        var oldMarkerEnd;
+        var array = [];
+        var pos = [];
+        var now = new Date();
+        function zeroPadded(val) {
+            if (val >= 10)
+                return val;
+            else
+                return '0' + val;
+        }
+        document.getElementById("timestart").value = now.getFullYear() + "-" + zeroPadded(now.getMonth()) + "-" + zeroPadded(now.getDate()) + "T" + now.getHours() + ":" + now.getMinutes()
+        document.getElementById("timestop").value = now.getFullYear() + "-" + zeroPadded(now.getMonth() + 1) + "-" + zeroPadded(now.getDate()) + "T" + now.getHours() + ":" + now.getMinutes()
+        $(function () {
+            $.connection.hub.url = "http://46.37.197.32:8080/Server/signalr"
+            con = $.connection.connectionHub;
+            $.connection.hub.start().done(function () {
+                $('#showRoute').click(function () {
+                    con.server.getRoute(token, $('#timestart').val(), $('#timestop').val()).done(function (result) {
+                        map.objects.clear();
+                        var routes = JSON.parse(result);
+                        console.log(routes);
+                        pos = [];
+                        var mark1 = new ovi.mapsapi.map.StandardMarker([routes[0].Latitude, routes[0].Longitude], {
+                            text: "Start",
+                            draggable: false,
+                            brush: { color: "#B22222" }
+                        });
+                        map.objects.add(mark1);
+                        var mark2 = new ovi.mapsapi.map.StandardMarker([routes[routes.length-1].Latitude, routes[routes.length-1].Longitude], {
+                            text: "End",
+                            draggable: false,
+                            brush: { color: "#B22222" }
+                        });
+                        map.objects.add(mark2);
+                        for (var i = 1; i < routes.length; i++) 
+                        {
+                            var len = Math.sqrt(Math.pow(routes[i].Latitude - routes[i - 1].Latitude, 2) + Math.pow(routes[i].Longitude - routes[i - 1].Longitude, 2));
+                            console.log(len > 0.001);
+                            if ((Math.abs(Date.parse(routes[i].DateTime) - Date.parse(routes[i - 1].DateTime)) > 5000) || (len > 0.05)) {
+                                //if (pos.length > 200) {
+                                var r = new ovi.mapsapi.map.Polyline(
+                                         pos,
+                                         {
+                                             pen: { strokeColor: "#22CA", lineWidth: 5 }
+                                         });
+                                r.addListener("click", show);
+                                map.objects.add(r);
+
+                                var obj = {
+                                    polyline: r,
+                                    start: routes[i - pos.length],
+                                    end: routes[i - 1]
+                                }
+                                array.push(obj);
+
+
+                                pos = [];
+                            }
+                            pos.push(new ovi.mapsapi.geo.Coordinate(routes[i].Latitude, routes[i].Longitude));
+                        }
+                        //alert(JSON.parse(pol));
+                        //map.objects.add(new ovi.mapsapi.map.Polyline(
+                        //    pos,
+                        //    {
+                        //        pen: { strokeColor: "#22CA", lineWidth: 5 }
+                        //    }
+                        //));
+                    });
+                });
+            });
+        });
+        function show() {
+
+            for (var i = 0; i < array.length; i++) {
+                if (this == array[i].polyline) {
+                    console.log("start: " + array[i].start.DateTime);
+                    console.log("end: " + array[i].end.DateTime);
+                    console.log(array[i].start.Latitude);
+                    if (oldMarkerStart != null && oldMarkerEnd != null) {
+                        map.objects.remove(oldMarkerStart);
+                        map.objects.remove(oldMarkerEnd);
+                    }
+                    var markerstart = new ovi.mapsapi.map.StandardMarker([array[i].start.Latitude, array[i].start.Longitude], {
+                        text: "Start",
+                        draggable: false
+                    });
+                    map.objects.add(markerstart);
+                    var markerend = new ovi.mapsapi.map.StandardMarker([array[i].end.Latitude, array[i].end.Longitude], {
+                        text: "End",
+                        draggable: false
+                    });
+                    map.objects.add(markerend);
+                    //<span class="label label-default">Default Label</span>
+                    document.getElementById("route-data").innerHTML = "<h5>Start: " + array[i].start.DateTime + "<br /> End: " + array[i].end.DateTime + "</h5>";
+                    oldMarkerStart = markerstart;
+                    oldMarkerEnd = markerend;
+                    
+                    //map.objects.add(new ovi.mapsapi.map.StandardMarker([array[i].end.Latitude, array[i].end.Longitude], {
+                    //    text: "Finish",
+                    //    draggable: false
+                    //}));
+                    //map.objects.removeComponent(ovi.mapsapi.map.StandardMarker([array[i].start.Latitude, array[i].start.Longitude], {
+                    //    text: "Start",
+                    //    draggable: false
+                    //}));
+                }
+            }
+        }
+        function initMap() {
+            map = new ovi.mapsapi.map.Display(
+                             document.getElementById("map"), {
+                                 components: [
+                                     new ovi.mapsapi.map.component.Behavior(),
+                                     new ovi.mapsapi.map.component.ZoomBar(),
+                                     new ovi.mapsapi.map.component.Overview(),
+                                     new ovi.mapsapi.map.component.TypeSelector(),
+                                     new ovi.mapsapi.map.component.ScaleBar()],
+                                 zoomLevel: 10,
+                                 center: [46.4613364, 30.7443335]
+                             });
+            map.removeComponent(map.getComponentById("zoom.MouseWheel"));
+        }
+    </script>
+</div>

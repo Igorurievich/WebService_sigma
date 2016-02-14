@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Routes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    CheckCookie();
+</script>
+<meta charset="utf-8">
+<link href="~/Content/Routes.css" rel="stylesheet" type="text/css" />
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+<script src="~/Scripts/jquery_cookie.js"></script>
+<script src="~/Scripts/CheckJS.js"></script>
+<script src="http://api.maps.ovi.com/jsl.js" type="text/javascript" charset="utf-8"></script>
+<script src="~/Scripts/WindowInfo.js"></script>
+<script src="~/Scripts/SignalR_API.js"></script>
+<div id="map"></div>
+<div id="control-panel">
+    <select>
+        <option value="first">Device #1</option>
+        <option value="second">Device #2</option>
+    </select>
+    <button id="setDevice" name="action" value="delete">Set Device</button><br />
+</div>
+<div id="window" class="notif notif-color-1">
+    <div class="delete-notif" onclick="destroy()">X</div>
+    <p id="windowText"></p>
+</div>
+<script type="text/javascript">
+    var token = $.cookie('tokenInfo');
+    if (token == null)
+    {
+        window.location.replace("/WebService/Acount/Login");
+        }
+    initMap();
+    var marker;
+    var circle;
+    var con;   
+    var username;
+    var markers = [];
+    var map;
+    $(function () {
+        $.connection.hub.url = "http://46.37.197.32:8080/Server/signalr"
+        con = $.connection.connectionHub;
+        con.client.newDeviceInfo = function (d_id, lon, lat, accuracy, dt, sos) {
+            var pos = new ovi.mapsapi.geo.Coordinate(lat, lon);
+            addMarkerWith(pos, dt, accuracy);
+        };
+        con.client.chack = function (info, text) {
+            console.log(info);
+            windowInfo(text);
+        };
+        $.connection.hub.start().done(function () {
+            con.server.subscriptionRenewalAsync($.cookie('tokenInfo')).done(function (user) {
+                $('#monitoring').text(user);
+            })
+            drop();
+        });
+    });
+    function drop() {
+        con.server.getLastDeviceInfoAsync($.cookie('tokenInfo')).done(function (user) {
+            console.log(user);
+            var pos = new ovi.mapsapi.geo.Coordinate(JSON.parse(user).Latitude, JSON.parse(user).Longitude);
+            addMarkerWith(pos, JSON.parse(user).DateTime, JSON.parse(user).Accuracy);
+        })
+    }
+    function addMarkerWith(position, name, accuracy) {
+        console.log(position);
+        if (marker != null)
+            map.objects.remove(marker);
+        if (circle != null)
+            map.objects.remove(circle);
+        marker = new ovi.mapsapi.map.Marker(
+        position, {
+            title: "marker",
+            visibility: true,
+        });
+        circle = new ovi.mapsapi.map.Circle(
+        position,
+        accuracy,
+        {
+            pen: { strokeColor: "#2224", lineWidth: 2 },
+            brush: { color: "#A4A7" }
+        });
+        map.objects.add(circle);
+        map.objects.add(marker);
+    }
+    function initMap() {
+        map = new ovi.mapsapi.map.Display(
+                         document.getElementById("map"), {
+                             components: [
+                                 new ovi.mapsapi.map.component.Behavior(),
+                                 new ovi.mapsapi.map.component.ZoomBar(),
+                                 new ovi.mapsapi.map.component.Overview(),
+                                 new ovi.mapsapi.map.component.TypeSelector(),
+                                 new ovi.mapsapi.map.component.ScaleBar()],
+                             zoomLevel: 10,
+                             center: [46.4613364, 30.7443335]
+                         });
+        map.removeComponent(map.getComponentById("zoom.MouseWheel"));
+    }
+
+</script>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AnalysisConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <SonarConfigDir>C:\Users\Женя\Documents\Visual Studio 2015\Projects\Sigma project\WebService3\WebService3\.sonarqube\conf</SonarConfigDir>
+  <SonarOutputDir>C:\Users\Женя\Documents\Visual Studio 2015\Projects\Sigma project\WebService3\WebService3\.sonarqube\out</SonarOutputDir>
+  <SonarBinDir>C:\Users\Женя\Documents\Visual Studio 2015\Projects\Sigma project\WebService3\WebService3\.sonarqube\bin</SonarBinDir>
+  <SonarRunnerWorkingDirectory>C:\Users\Женя\Documents\Visual Studio 2015\Projects\Sigma project\WebService3\WebService3</SonarRunnerWorkingDirectory>
+  <SonarQubeHostUrl>http://localhost:9000</SonarQubeHostUrl>
+  <SonarProjectKey>WebServer3</SonarProjectKey>
+  <SonarProjectVersion>0.04</SonarProjectVersion>
+  <SonarProjectName>WebServer3</SonarProjectName>
+  <AdditionalConfig>
+    <ConfigSetting Id="BuildUri" />
+    <ConfigSetting Id="TfsUri" />
+    <ConfigSetting Id="settings.file.path" Value="C:\Sonar\MSBuild\SonarQube.Analysis.xml" />
+  </AdditionalConfig>
+  <ServerSettings>
+    <Property Name="sonar.core.id">20151123150006</Property>
+    <Property Name="sonar.core.version">5.2</Property>
+    <Property Name="sonar.core.startTime">23.11.2015 15:00:06</Property>
+    <Property Name="sonar.qualitygate">1</Property>
+    <Property Name="sonar.permission.template.default">default_template</Property>
+    <Property Name="sonar.cs.msbuild.testProjectPattern">[^\\]*test[^\\]*$</Property>
+  </ServerSettings>
+  <LocalSettings />
+</AnalysisConfig>
